@@ -5,7 +5,7 @@
 - [pydub](https://github.com/jiaaro/pydub) (© 2011 James Robert)
 
 ## Getting Started
-- Download this repository as [zip](linkhere) or clone it locally
+- Download this repository as [zip](https://github.com/bttger/spotirip/archive/master.zip) or clone it locally
 - Download ffmpeg or libav (as described in the [pydub doc](https://github.com/jiaaro/pydub#dependencies))
 - Install the dependencies
 
