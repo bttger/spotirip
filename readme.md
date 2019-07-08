@@ -27,7 +27,8 @@ CLIENT_SECRET = "aLotOfNumbersAndCharacters"
 REDIRECT_URL = "http://localhost/"
 ```
 
-- Start Spotify, play music and then start spotirip
+- Run [list_cards.py](list_cards.py) to choose the soundcard id and override it in the constants file
+- Start Spotify, play music and then run spotirip
 
 ```
 $ py main.py -h
