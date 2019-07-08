@@ -1,10 +1,20 @@
 import argparse
+import os
 import spotirip as sr
 from time import sleep
 import multiprocessing as mp
 
 
+def make_dir(directory):
+    try:
+        os.mkdir(directory)
+    except OSError:
+        print("Creation of the directory %s failed" % directory)
+
+
 def main(immediately, mp3, quality, username, directory):
+    make_dir(directory)
+
     player = sr.spotify.Spotify(sr.const.USERNAME if username is None else username)
     rec_queue = mp.Queue()
     tags = player.get_tags()
@@ -17,7 +27,7 @@ def main(immediately, mp3, quality, username, directory):
 
     remain = player.get_remaining_playback_time()
 
-    rec_process = mp.Process(target=sr.recorder.start_recording, args=(rec_queue, 10000,))
+    rec_process = mp.Process(target=sr.recorder.start_recording, args=(rec_queue, 1000,))
     print("start rec_process")
     rec_process.start()
     print("wait rec_process")
@@ -46,8 +56,12 @@ if __name__ == "__main__":
                              "set it will save the files in the /music subdirectory of spotirip.")
     args = parser.parse_args()
 
-    # TODO sicherstellen dass spotify music läuft
-    # TODO create music/
+    print("Please ensure that the following conditions are met:"
+          "\n\t- Spotify is already playing"
+          "\n\t- Normalize volume is activated"
+          "\n\t- Crossfading is deactivated"
+          "\n\nIf you are sure press enter...")
+    input()
 
     main(args.immediately, args.mp3, args.quality, args.username,
          args.directory if args.directory is not None else "music/")
