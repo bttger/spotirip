@@ -21,16 +21,15 @@ class Spotify:
         self._client.volume(100)
         # self._client.repeat("off") not working when playlist is off and spotify autoplay is activated
 
+    def update_current_playback(self):
+        self._current_playback = self._client.current_playback()
+
     def get_remaining_playback_time(self):
-        self._update_current_playback()
         return self._current_playback["item"]["duration_ms"] - self._current_playback["progress_ms"]
 
     def reset_playback(self):
         self._client.seek_track(0)
         #self._client.pause_playback()
-
-    def _update_current_playback(self):
-        self._current_playback = self._client.current_playback()
 
     def get_tags(self):
         artists = ""
@@ -42,3 +41,9 @@ class Spotify:
 
     def get_file_name(self):
         return "%s - %s" % (self.get_tags()["artist"], self.get_tags()["title"])
+
+    def get_timestamps(self):
+        start_timestamp = (self._current_playback["timestamp"] - self._current_playback["progress_ms"]) / 1000
+        end_timestamp = (self._current_playback["timestamp"] + self._current_playback["item"]["duration_ms"]) / 1000
+
+        return start_timestamp, end_timestamp

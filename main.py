@@ -3,6 +3,17 @@ import os
 import spotirip as sr
 from time import sleep
 import multiprocessing as mp
+import queue
+import spotirip.const as const
+import threading
+
+_FINISH = False
+
+recorded_queue = mp.Queue()  # tuple<audio_array, epoch timestamp end of recording>
+song_meta_queue = queue.Queue()  # tuple<filename, tags, tuple<epoch timestamp begin, end>>
+rec_process_queue = queue.Queue()  # all started recording processes because they are not terminating automatically
+
+remaining_records_to_export = 0
 
 
 def make_dir(directory):
@@ -12,32 +23,91 @@ def make_dir(directory):
         print("Creation of the directory %s failed" % directory)
 
 
+def check_exit():
+    global _FINISH
+    while True:
+        if input() == "exit":
+            print("\nWait for remaining record...")
+            _FINISH = True
+            break
+
+
+def check_new_recordings(directory, mp3):
+    global recorded_queue
+    global song_meta_queue
+    global rec_process_queue
+
+    global remaining_records_to_export
+
+    while not _FINISH:
+        while remaining_records_to_export > 0:
+            # get both the recording and song metadata
+            rec = recorded_queue.get()
+            song_meta = song_meta_queue.get()
+
+            # terminate the corresponding recording process because it will not terminate by itself
+            rec_process_queue.get().terminate()
+
+            # start exporting
+            exp_process = mp.Process(target=sr.exporter.export,
+                                     args=(rec[0], directory, song_meta[0], song_meta[1], song_meta[2][0],
+                                           song_meta[2][1], rec[1], mp3,))
+            exp_process.start()
+            remaining_records_to_export -= 1
+
+            print("\nExported: %s" % song_meta[0])
+        sleep(1)
+
+
 def main(immediately, mp3, quality, username, directory):
     make_dir(directory)
 
+    _check_exit = threading.Thread(target=check_exit)
+    _check_exit.start()
+
+    _check_new_recordings = threading.Thread(target=check_new_recordings, args=(directory, mp3,))
+    _check_new_recordings.start()
+
     player = sr.spotify.Spotify(sr.const.USERNAME if username is None else username)
-    rec_queue = mp.Queue()
-    tags = player.get_tags()
-    filename = player.get_file_name()
+
+    global recorded_queue
+    global song_meta_queue
+    global rec_process_queue
+
+    global remaining_records_to_export
 
     if immediately:
         player.reset_playback()
-    else:
-        sleep(player.get_remaining_playback_time() / 60 - sr.const.MEAN_RESP_TIME / 1000)
+        # TODO stop playback, start recording and after x seconds start playback
 
-    remain = player.get_remaining_playback_time()
+    while True:
+        remain = player.get_remaining_playback_time()
 
-    rec_process = mp.Process(target=sr.recorder.start_recording, args=(rec_queue, 1000,))
-    print("start rec_process")
-    rec_process.start()
-    print("wait rec_process")
-    sleep(2)
+        # sleep until just before the next song
+        sleep(remain / 1000 - const.FORERUN)
 
-    exp_process = mp.Process(target=sr.exporter.export_mp3, args=(rec_queue.get(), directory, filename, tags,))
-    print("start exp_process")
-    exp_process.start()
-    print("wait exp_process")
+        # start recording before next song begins because of latency
+        if not _FINISH:
+            rec_process = mp.Process(target=sr.recorder.start_recording,
+                                     args=(recorded_queue, int(const.MAX_SONG_LENGTH * 1000),))
+            rec_process.start()
+            rec_process_queue.put(rec_process)
+            remaining_records_to_export += 1
 
+        if _FINISH:
+            print("\nWait for remaining export...")
+            _check_exit.join()
+            _check_new_recordings.join()
+            break
+
+        # sleep until next song began
+        sleep(const.FORERUN * 2)
+
+        # Put currently playing song in song metadata queue
+        player.update_current_playback()
+        timestamps = player.get_timestamps()
+        song_meta_queue.put((player.get_file_name(), player.get_tags(), (timestamps[0], timestamps[1])))
+        print("\n\nCurrently Recording: %s\n\n" % player.get_file_name())
 
 
 if __name__ == "__main__":
