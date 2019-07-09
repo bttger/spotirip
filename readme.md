@@ -53,3 +53,6 @@ optional arguments:
                         songs. If not set it will save the files in the /music
                         subdirectory of spotirip.
 ```
+
+## Disclaimer
+This software is for educational purposes only. No responsibility is held or accepted for misuse.
