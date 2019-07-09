@@ -130,6 +130,7 @@ if __name__ == "__main__":
           "\n\t- Spotify is already playing"
           "\n\t- Normalize volume is activated"
           "\n\t- Crossfading is deactivated"
+          "\n\t- Your hostmachine's time is synched"
           "\n\nIf you are sure press enter...")
     input()
 

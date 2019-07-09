@@ -9,11 +9,27 @@ def _convert(audio_array):
 
 
 def _cut(audio_array, start_timestamp, end_timestamp, rec_end_timestamp):
-    start_frame = int(((start_timestamp - rec_end_timestamp) + const.DELTA) * const.FRAMERATE)
+    start_frame = int(((start_timestamp - rec_end_timestamp) - const.DELTA) * const.FRAMERATE)
     end_frame = int(((end_timestamp - rec_end_timestamp) + const.DELTA) * const.FRAMERATE)
 
-    # TODO cut off everything on both sides where no sound
-    return audio_array[start_frame:end_frame]
+    audio_array_cut = audio_array[start_frame:end_frame]
+
+    """i = 0
+    # search for first occurrence when no sound is played on both channels
+    while int(audio_array_cut[i][0] * 2 ** 15) != 0 or int(audio_array_cut[i][1] * 2 ** 15) != 0:
+        i += 1
+
+    # search for first occurrence in new song when sound is played
+    while int(audio_array_cut[i][0] * 2 ** 15) == 0:
+        i += 1
+
+    j = i
+    # search for second occurrence when no sound is played (after the song ends)
+    while int(audio_array_cut[j][0] * 2 ** 15) != 0 or int(audio_array_cut[j][1] * 2 ** 15) != 0:
+        j += 1
+
+    return audio_array_cut[i:j]"""
+    return audio_array_cut
 
 
 def _export_mp3(audio_segment, directory, filename, tags):
