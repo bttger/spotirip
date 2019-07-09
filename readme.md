@@ -54,5 +54,8 @@ optional arguments:
                         subdirectory of spotirip.
 ```
 
+- To exit spotirip type ```exit``` in your console and spotirip will just record the current playing song and
+terminate after exporting it
+
 ## Disclaimer
 This software is for educational purposes only. No responsibility is held or accepted for misuse.
