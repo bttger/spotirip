@@ -14,22 +14,35 @@ def _cut(audio_array, start_timestamp, end_timestamp, rec_end_timestamp):
 
     audio_array_cut = audio_array[start_frame:end_frame]
 
-    """i = 0
-    # search for first occurrence when no sound is played on both channels
-    while int(audio_array_cut[i][0] * 2 ** 15) != 0 or int(audio_array_cut[i][1] * 2 ** 15) != 0:
+    i = 0
+    # search for first occurrence when sound is played (after previous song)
+    while True:
+        # check if sound is not played for at least const.GAMMA time
+        i2 = i
+        while int(audio_array_cut[i2][0] * 2 ** 15) == 0 and int(audio_array_cut[i2][1] * 2 ** 15) == 0:
+            i2 += 1
+
+        if i2 - i > const.GAMMA * const.FRAMERATE or i > const.DELTA * const.FRAMERATE * 2:
+            i = i2
+            break
+
         i += 1
 
-    # search for first occurrence in new song when sound is played
-    while int(audio_array_cut[i][0] * 2 ** 15) == 0:
-        i += 1
+    j = len(audio_array_cut) - 1
+    # search for first occurrence when sound is played (from the back)
+    while True:
+        # check if sound is not played for at least const.GAMMA time
+        j2 = j
+        while int(audio_array_cut[j2][0] * 2 ** 15) == 0 and int(audio_array_cut[j2][1] * 2 ** 15) == 0:
+            j2 -= 1
 
-    j = i
-    # search for second occurrence when no sound is played (after the song ends)
-    while int(audio_array_cut[j][0] * 2 ** 15) != 0 or int(audio_array_cut[j][1] * 2 ** 15) != 0:
-        j += 1
+        if j - j2 > const.GAMMA * const.FRAMERATE or len(audio_array_cut) - j > const.DELTA * const.FRAMERATE * 4:
+            j = j2
+            break
 
-    return audio_array_cut[i:j]"""
-    return audio_array_cut
+        j -= 1
+
+    return audio_array_cut[i:j]
 
 
 def _export_mp3(audio_segment, directory, filename, tags):
