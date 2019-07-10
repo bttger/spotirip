@@ -1,3 +1,6 @@
+# Spotirip
+#### The Spotify Ripper - records your streamed music, exports it to wav or mp3 and tags it automatically
+
 ## Dependencies
 - Python 3.7+
 - [Spotipy](https://github.com/plamere/spotipy) (© 2014 Paul Lamere)
@@ -54,8 +57,13 @@ optional arguments:
                         subdirectory of spotirip.
 ```
 
-- To exit spotirip type ```exit``` in your console and spotirip will just record the current playing song and
+- To exit Spotirip type ```exit``` in your console and spotirip will just record the current playing song and
 terminate after exporting it
+
+## Tips
+A good internet connection is mandatory and I recommend either to turn off your Dropbox/G-Drive Sync or to choose a directory where it is not getting synced all the time. In my case my bad internet connection caused problems and python threw some errors while making HTTP requests to the Spotify API.
+
+Furthermore you should really exit Spotirip with the ```exit``` command and let Spotify continue playing to ensure that the recording gets well finished and exported. This can take some time depending on the ```MAX_SONG_LENGTH``` in the constants file. This constant is necessary because the recoding will start with a delay and therefore we have to start it before the next song actually begins. But since the Spotify API does not give the ability to get the duration of the next song, it is not possible to forward the correct record duration to the recorder (which needs the duration before starting the recording).
 
 ## Disclaimer
 This software is for educational purposes only. No responsibility is held or accepted for misuse.
