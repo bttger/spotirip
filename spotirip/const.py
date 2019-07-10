@@ -13,5 +13,5 @@ FRAMERATE = 44100
 FORERUN = 4  # in seconds
 DELTA = 2  # in seconds, expanding the recorded frame
 GAMMA = 0.05  # in seconds, the threshold for recognizing the gap between two songs
-OMEGA = 50  # threshold for maximum volume level in gap between two songs
+OMEGA = 40  # threshold for maximum volume level in gap between two songs
 MAX_SONG_LENGTH = 300  # in seconds, maximum length of recorded songs
