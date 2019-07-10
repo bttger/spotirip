@@ -10,7 +10,7 @@ def _convert(audio_array):
 
 def _cut(audio_array, start_timestamp, end_timestamp, rec_end_timestamp):
     start_frame = int(((start_timestamp - rec_end_timestamp) - const.DELTA) * const.FRAMERATE)
-    end_frame = int(((end_timestamp - rec_end_timestamp) + const.DELTA) * const.FRAMERATE)
+    end_frame = int(((end_timestamp - rec_end_timestamp) + const.DELTA * 4) * const.FRAMERATE)
 
     audio_array_cut = audio_array[start_frame:end_frame]
 
@@ -29,6 +29,7 @@ def _cut(audio_array, start_timestamp, end_timestamp, rec_end_timestamp):
         i += 1
 
     j = len(audio_array_cut) - 1
+    print(j) # TODO improve end cutting
     # search for first occurrence when sound is played (from the back)
     while True:
         # check if sound is not played for at least const.GAMMA time
@@ -36,8 +37,9 @@ def _cut(audio_array, start_timestamp, end_timestamp, rec_end_timestamp):
         while int(audio_array_cut[j2][0] * 2 ** 15) == 0 and int(audio_array_cut[j2][1] * 2 ** 15) == 0:
             j2 -= 1
 
-        if j - j2 > const.GAMMA * const.FRAMERATE or len(audio_array_cut) - j > const.DELTA * const.FRAMERATE * 4:
+        if j - j2 > const.GAMMA * const.FRAMERATE or len(audio_array_cut) - j > const.DELTA * const.FRAMERATE * 6:
             j = j2
+            print(j)
             break
 
         j -= 1

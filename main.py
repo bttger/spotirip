@@ -76,15 +76,12 @@ def main(immediately, mp3, quality, username, directory):
 
     global remaining_records_to_export
 
-    if immediately:
-        player.reset_playback()
-        # TODO stop playback, start recording and after x seconds start playback
-
     while True:
         remain = player.get_remaining_playback_time()
 
-        # sleep until just before the next song
-        sleep(remain / 1000 - const.FORERUN)
+        if not immediately:
+            # sleep until just before the next song
+            sleep(remain / 1000 - const.FORERUN)
 
         # start recording before next song begins because of latency
         if not _FINISH:
@@ -93,15 +90,23 @@ def main(immediately, mp3, quality, username, directory):
             rec_process.start()
             rec_process_queue.put(rec_process)
             remaining_records_to_export += 1
-
-        if _FINISH:
+        else:
             print("\nWait for remaining export...")
             _check_exit.join()
             _check_new_recordings.join()
             break
 
-        # sleep until next song began
-        sleep(const.FORERUN * 2)
+        if immediately:
+            player.reset_playback()
+            sleep(const.DELTA)
+            player.resume_playback()
+
+            # sleep until 1/4 of the song to not exceed API requests in short period
+            sleep(remain / 4000)
+            immediately = False
+        else:
+            # sleep until next song began
+            sleep(const.FORERUN * 2)
 
         # Put currently playing song in song metadata queue
         player.update_current_playback()

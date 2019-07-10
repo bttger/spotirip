@@ -22,16 +22,30 @@ class Spotify:
         # self._client.repeat("off") not working when playlist is off and spotify autoplay is activated
 
     def update_current_playback(self):
+        """Updates all information held in the Spotify client, like remaining time, tags and timestamps."""
+
         self._current_playback = self._client.current_playback()
 
     def get_remaining_playback_time(self):
+        """Returns the remaining playback time in ms."""
+
         return self._current_playback["item"]["duration_ms"] - self._current_playback["progress_ms"]
 
     def reset_playback(self):
+        """Sets the playback to the song beginning and pauses.\n
+        After this, the resume_playback function has to be called manually."""
+
         self._client.seek_track(0)
-        #self._client.pause_playback()
+        self._client.pause_playback()
+
+    def resume_playback(self):
+        # self._client.start_playback(offset={"position": 0})
+        self._client.start_playback()
 
     def get_tags(self):
+        """Returns a dictionary with 3 items corresponding to the tags of the current playing song.
+        Those tags are the artist (String of all artists), title and album title."""
+
         artists = ""
         for artist in self._current_playback["item"]["artists"]:
             artists += artist["name"] + ", "
@@ -40,9 +54,14 @@ class Spotify:
                 "album": self._current_playback["item"]["album"]["name"]}
 
     def get_file_name(self):
+        """Returns a string with the artist and title of the current playing song, separated by a dash."""
+
         return "%s - %s" % (self.get_tags()["artist"], self.get_tags()["title"])
 
     def get_timestamps(self):
+        """Returns two timestamps in a tuple.
+        First one is the start timestamp of the current playing song. The second one is accordingly for the end."""
+
         start_timestamp = (self._current_playback["timestamp"] - self._current_playback["progress_ms"]) / 1000
         end_timestamp = (self._current_playback["timestamp"] + self._current_playback["item"]["duration_ms"]) / 1000
 
