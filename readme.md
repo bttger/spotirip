@@ -22,8 +22,6 @@ $ pip install spotipy SoundCard pydub
 - Paste your details in the [const.py](spotirip/const.py)
 
 ```python
-spotirip/const.py
-
 USERNAME = "myUserName"
 CLIENT_ID = "aLotOfNumbersAndCharacters"
 CLIENT_SECRET = "aLotOfNumbersAndCharacters"
