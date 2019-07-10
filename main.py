@@ -106,7 +106,7 @@ def main(immediately, mp3, quality, username, directory):
             immediately = False
         else:
             # sleep until next song began
-            sleep(const.FORERUN * 2)
+            sleep(const.FORERUN * 3)
 
         # Put currently playing song in song metadata queue
         player.update_current_playback()
