@@ -1,6 +1,7 @@
 import spotirip.const as const
 import pydub as pd
 import numpy as np
+from math import sqrt
 
 
 def _convert(audio_array):
@@ -10,7 +11,7 @@ def _convert(audio_array):
 
 def _cut(audio_array, start_timestamp, end_timestamp, rec_end_timestamp):
     start_frame = int(((start_timestamp - rec_end_timestamp) - const.DELTA) * const.FRAMERATE)
-    end_frame = int(((end_timestamp - rec_end_timestamp) + const.DELTA * 4) * const.FRAMERATE)
+    end_frame = int(((end_timestamp - rec_end_timestamp) + const.DELTA * 2) * const.FRAMERATE)
 
     audio_array_cut = audio_array[start_frame:end_frame]
 
@@ -19,7 +20,7 @@ def _cut(audio_array, start_timestamp, end_timestamp, rec_end_timestamp):
     while True:
         # check if sound is not played for at least const.GAMMA time
         i2 = i
-        while int(audio_array_cut[i2][0] * 2 ** 15) == 0 and int(audio_array_cut[i2][1] * 2 ** 15) == 0:
+        while abs(audio_array_cut[i2][0] * 2 ** 15) < const.OMEGA and abs(audio_array_cut[i2][1] * 2 ** 15) < const.OMEGA:
             i2 += 1
 
         if i2 - i > const.GAMMA * const.FRAMERATE or i > const.DELTA * const.FRAMERATE * 2:
@@ -29,17 +30,15 @@ def _cut(audio_array, start_timestamp, end_timestamp, rec_end_timestamp):
         i += 1
 
     j = len(audio_array_cut) - 1
-    print(j) # TODO improve end cutting
     # search for first occurrence when sound is played (from the back)
     while True:
         # check if sound is not played for at least const.GAMMA time
         j2 = j
-        while int(audio_array_cut[j2][0] * 2 ** 15) == 0 and int(audio_array_cut[j2][1] * 2 ** 15) == 0:
+        while abs(audio_array_cut[j2][0] * 2 ** 15) < const.OMEGA and abs(audio_array_cut[j2][1] * 2 ** 15) < const.OMEGA:
             j2 -= 1
 
-        if j - j2 > const.GAMMA * const.FRAMERATE or len(audio_array_cut) - j > const.DELTA * const.FRAMERATE * 6:
+        if j - j2 > const.GAMMA * const.FRAMERATE or len(audio_array_cut) - j > const.DELTA * const.FRAMERATE * 2:
             j = j2
-            print(j)
             break
 
         j -= 1
