@@ -14,6 +14,7 @@
 
 ```
 $ pip install spotipy soundcard pydub
+$ pip install git+https://github.com/plamere/spotipy.git --upgrade
 ```
 
 - Get yourself the spotify api access on their developer site
