@@ -9,11 +9,11 @@
 
 ## Getting Started
 - Download this repository as [zip](https://github.com/bttger/spotirip/archive/master.zip) or clone it locally
-- Download ffmpeg or libav (as described in the [pydub doc](https://github.com/jiaaro/pydub#dependencies))
+- Download ffmpeg or libav (as described in the [pydub doc](https://github.com/jiaaro/pydub#dependencies), for exporting to mp3)
 - Install the dependencies
 
 ```
-$ pip install spotipy SoundCard pydub
+$ pip install spotipy soundcard pydub
 ```
 
 - Get yourself the spotify api access on their developer site
@@ -62,6 +62,8 @@ terminate after exporting it
 A good internet connection is mandatory and I recommend either to turn off your Dropbox/G-Drive Sync or to choose a directory where it is not getting synced all the time. In my case my bad internet connection caused problems and python threw some errors while making HTTP requests to the Spotify API.
 
 Furthermore you should really exit Spotirip with the ```exit``` command and let Spotify continue playing to ensure that the recording gets well finished and exported. This can take some time depending on the ```MAX_SONG_LENGTH``` in the constants file. This constant is necessary because the recoding will start with a delay and therefore we have to start it before the next song actually begins. But since the Spotify API does not give the ability to get the duration of the next song, it is not possible to forward the correct record duration to the recorder (which needs the duration before starting the recording).
+
+Also you must be aware of the memory usage since it is recording the soundcard with by default 44100 frames per second in a numpy array. For a maximum song length of more than like eight minutes you should have a pc with at least eight gigabyte of RAM. The problem is that python allocates memory depending on the total pc RAM and because it does not want to exhaust the total memory, it simply limits the memory usage and throws a memory error exception if the limit is reached.
 
 ## Disclaimer
 This software is for educational purposes only. No responsibility is held or accepted for misuse.
