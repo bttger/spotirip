@@ -26,6 +26,14 @@ class Spotify:
 
         self._current_playback = self._client.current_playback()
 
+    def update_access_token(self):
+        """Updates the access token to the Spotify API because it will expire after an hour."""
+        self.token = util.prompt_for_user_token(self._username, scope,
+                                                client_id=const.CLIENT_ID,
+                                                client_secret=const.CLIENT_SECRET,
+                                                redirect_uri=const.REDIRECT_URL)
+        self._client = spotipy.Spotify(auth=self.token)
+
     def get_remaining_playback_time(self):
         """Returns the remaining playback time in ms."""
 

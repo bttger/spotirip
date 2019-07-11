@@ -6,14 +6,16 @@ import multiprocessing as mp
 import queue
 import spotirip.const as const
 import threading
+import json
+import time
 
 _FINISH = False
+
+remaining_records_to_export = 0
 
 recorded_queue = mp.Queue()  # tuple<audio_array, epoch timestamp end of recording>
 song_meta_queue = queue.Queue()  # tuple<filename, tags, tuple<epoch timestamp begin, end>>
 rec_process_queue = queue.Queue()  # all started recording processes because they are not terminating automatically
-
-remaining_records_to_export = 0
 
 
 def make_dir(directory):
@@ -30,6 +32,12 @@ def check_exit():
             print("\nWait for remaining record...")
             _FINISH = True
             break
+
+
+def get_expiry_time():
+    with open(".cache-%s" % const.USERNAME) as cached_auth:
+        expiry_time = json.load(cached_auth)["expires_at"]
+        return expiry_time
 
 
 def check_new_recordings(directory, mp3):
@@ -62,19 +70,21 @@ def check_new_recordings(directory, mp3):
 def main(immediately, mp3, quality, username, directory):
     make_dir(directory)
 
-    _check_exit = threading.Thread(target=check_exit)
-    _check_exit.start()
-
-    _check_new_recordings = threading.Thread(target=check_new_recordings, args=(directory, mp3,))
-    _check_new_recordings.start()
-
-    player = sr.spotify.Spotify(sr.const.USERNAME if username is None else username)
+    global remaining_records_to_export
 
     global recorded_queue
     global song_meta_queue
     global rec_process_queue
 
-    global remaining_records_to_export
+    player = sr.spotify.Spotify(sr.const.USERNAME if username is None else username)
+
+    expiry_time = get_expiry_time()
+
+    _check_exit = threading.Thread(target=check_exit)
+    _check_exit.start()
+
+    _check_new_recordings = threading.Thread(target=check_new_recordings, args=(directory, mp3,))
+    _check_new_recordings.start()
 
     while True:
         remain = player.get_remaining_playback_time()
@@ -107,6 +117,10 @@ def main(immediately, mp3, quality, username, directory):
         else:
             # sleep until next song began
             sleep(const.FORERUN * 3)
+
+        if expiry_time < time.time():
+            player.update_access_token()
+            expiry_time = get_expiry_time()
 
         # Put currently playing song in song metadata queue
         player.update_current_playback()
