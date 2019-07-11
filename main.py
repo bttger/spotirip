@@ -55,7 +55,7 @@ def check_new_recordings(directory, mp3):
             exp_process.start()
             remaining_records_to_export -= 1
 
-            print("\nExported: %s" % song_meta[0])
+            print("\nExported: %s\n" % song_meta[0])
         sleep(1)
 
 
