@@ -34,8 +34,8 @@ REDIRECT_URL = "http://localhost/"
 
 ```
 $ py main.py -h
-
-usage: main.py [-h] [-i] [-m] [-u USERNAME] [-q QUALITY] [-d DIRECTORY]
+usage: main.py [-h] [-i] [-m] [--min MIN] [--secs SECS] [-u USERNAME]
+               [-q QUALITY] [-d DIRECTORY]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -44,9 +44,13 @@ optional arguments:
                         beginning. If not set, recording will start within the
                         next song.
   -m, --mp3             Export in mp3 format.
+  --min MIN             Set the max song length in minutes temporarily for
+                        this session as opposed to the constants file.
+  --secs SECS           Set the max song length in seconds temporarily for
+                        this session as opposed to the constants file.
   -u USERNAME, --username USERNAME
-                        Change the user temporarily for this session as
-                        opposed to the constants file.
+                        Set the user temporarily for this session as opposed
+                        to the constants file.
   -q QUALITY, --quality QUALITY
                         Set the export quality in Kbit/s temporarily for this
                         session.
@@ -54,6 +58,8 @@ optional arguments:
                         Set the directory where you want to save the recorded
                         songs. If not set it will save the files in the /music
                         subdirectory of spotirip.
+
+$ py main.py -i -m -min 5
 ```
 
 - To exit Spotirip type ```exit``` in your console and spotirip will just record the current playing song and

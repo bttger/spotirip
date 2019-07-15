@@ -67,7 +67,7 @@ def check_new_recordings(directory, mp3):
         sleep(1)
 
 
-def main(immediately, mp3, quality, username, directory):
+def main(immediately, mp3, quality, username, directory,max_song_length):
     make_dir(directory)
 
     global remaining_records_to_export
@@ -83,6 +83,7 @@ def main(immediately, mp3, quality, username, directory):
     _check_exit = threading.Thread(target=check_exit)
     _check_exit.start()
 
+    # trailing comma in args is just to make it an iterable (tuple) which can be omitted with more than one argument
     _check_new_recordings = threading.Thread(target=check_new_recordings, args=(directory, mp3,))
     _check_new_recordings.start()
 
@@ -95,8 +96,8 @@ def main(immediately, mp3, quality, username, directory):
 
         # start recording before next song begins because of latency
         if not _FINISH:
-            rec_process = mp.Process(target=sr.recorder.start_recording,
-                                     args=(recorded_queue, int(const.MAX_SONG_LENGTH * 1000),))
+            rec_process = mp.Process(target=sr.recorder.start_recording, args=(recorded_queue,
+                            int(const.MAX_SONG_LENGTH * 1000) if max_song_length is None else max_song_length + 20))
             rec_process.start()
             rec_process_queue.put(rec_process)
             remaining_records_to_export += 1
@@ -136,8 +137,12 @@ if __name__ == "__main__":
                              "back to song beginning. If not set, recording will start within the next song.")
     parser.add_argument("-m", "--mp3", action="store_true",
                         help="Export in mp3 format.")
+    parser.add_argument("--min", help="Set the max song length in minutes temporarily for this session "
+                                      "as opposed to the constants file.", type=int)
+    parser.add_argument("--secs", help="Set the max song length in seconds temporarily for this session "
+                                       "as opposed to the constants file.", type=int)
     parser.add_argument("-u", "--username",
-                        help="Change the user temporarily for this session as opposed to the constants file.")
+                        help="Set the user temporarily for this session as opposed to the constants file.")
     parser.add_argument("-q", "--quality", type=int,
                         help="Set the export quality in Kbit/s temporarily for this session.")
     parser.add_argument("-d", "--directory",
@@ -154,4 +159,5 @@ if __name__ == "__main__":
     input()
 
     main(args.immediately, args.mp3, args.quality, args.username,
-         args.directory if args.directory is not None else "music/")
+         args.directory if args.directory is not None else "music/",
+         args.secs if args.min is None else args.min * 60)
